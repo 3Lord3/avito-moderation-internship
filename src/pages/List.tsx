@@ -1,6 +1,4 @@
 import {useEffect, useState} from 'react';
-import {Card, CardContent} from '@/components/ui/card';
-import {Button} from '@/components/ui/button';
 import {
     Pagination,
     PaginationContent,
@@ -10,21 +8,42 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 import {AdCard} from '@/components/ads/AdCard';
+import {AdsFilters} from '@/components/ads/AdsFilters';
+import {AdsState} from '@/components/ads/AdsState';
 import {adsApi} from '@/services/api/ads';
-import type {Ad, AdsFilters} from '@/types/ads';
+import type {Ad, AdsFilters as IAdsFilters, AdsResponse, PaginationInfo, SortField, SortOrder} from '@/types/ads';
 
 export default function List() {
     const [ads, setAds] = useState<Ad[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [filters, setFilters] = useState<AdsFilters>({
+    const [filters, setFilters] = useState<IAdsFilters>({
         page: 1,
         limit: 10,
         sortBy: 'createdAt',
         sortOrder: 'desc',
+        status: [],
+        categoryId: undefined,
+        minPrice: undefined,
+        maxPrice: undefined,
+        search: '',
+        priority: undefined,
     });
 
-    const [pagination, setPagination] = useState({
+    const [appliedFilters, setAppliedFilters] = useState<IAdsFilters>({
+        page: 1,
+        limit: 10,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+        status: [],
+        categoryId: undefined,
+        minPrice: undefined,
+        maxPrice: undefined,
+        search: '',
+        priority: undefined,
+    });
+
+    const [pagination, setPagination] = useState<PaginationInfo>({
         currentPage: 1,
         totalPages: 1,
         totalItems: 0,
@@ -33,13 +52,24 @@ export default function List() {
 
     useEffect(() => {
         fetchAds();
-    }, [filters.page]);
+    }, [
+        appliedFilters.page,
+        appliedFilters.limit,
+        appliedFilters.sortBy,
+        appliedFilters.sortOrder,
+        appliedFilters.status,
+        appliedFilters.priority,
+        appliedFilters.categoryId,
+        appliedFilters.minPrice,
+        appliedFilters.maxPrice,
+        appliedFilters.search
+    ]);
 
     const fetchAds = async () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await adsApi.getAds(filters);
+            const response: AdsResponse = await adsApi.getAds(appliedFilters);
             setAds(response.ads);
             setPagination(response.pagination);
         } catch (err) {
@@ -53,12 +83,34 @@ export default function List() {
     const handlePageChange = (newPage: number) => {
         if (newPage < 1 || newPage > pagination.totalPages) return;
 
-        setFilters(prev => ({
+        setAppliedFilters(prev => ({
             ...prev,
             page: newPage
         }));
 
         window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+
+    const applyFilters = () => {
+        setAppliedFilters({...filters, page: 1});
+    };
+
+    const resetFilters = () => {
+        const defaultFilters = {
+            page: 1,
+            limit: 10,
+            sortBy: 'createdAt' as SortField,
+            sortOrder: 'desc' as SortOrder,
+            status: [],
+            categoryId: undefined,
+            minPrice: undefined,
+            maxPrice: undefined,
+            search: '',
+            priority: undefined,
+        };
+
+        setFilters(defaultFilters);
+        setAppliedFilters(defaultFilters);
     };
 
     const getPageNumbers = () => {
@@ -79,23 +131,16 @@ export default function List() {
         return pages;
     };
 
-    if (error) {
-        return (
-            <div className="container mx-auto">
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="text-center text-red-600">
-                            <h2 className="text-xl font-semibold mb-2">Ошибка</h2>
-                            <p>{error}</p>
-                            <Button onClick={fetchAds} className="mt-4">
-                                Попробовать снова
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+    const hasActiveFilters = () => {
+        return !!(
+            (filters.status && filters.status.length > 0) ||
+            filters.priority ||
+            filters.categoryId ||
+            filters.minPrice ||
+            filters.maxPrice ||
+            filters.search
         );
-    }
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -106,73 +151,71 @@ export default function List() {
                 </div>
             </div>
 
-            <div>
-                {loading ? (
-                    <Card>
-                        <CardContent className="p-6">
-                            <div className="text-center">Загрузка объявлений...</div>
-                        </CardContent>
-                    </Card>
-                ) : ads.length === 0 ? (
-                    <Card>
-                        <CardContent className="p-6">
-                            <div className="text-center text-muted-foreground">
-                                <div className="text-4xl mb-4">📭</div>
-                                <h3 className="text-lg font-semibold mb-2">Объявления не найдены</h3>
-                                <p>На данный момент нет объявлений</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <>
-                        <div className="space-y-4 mb-6">
-                            {ads.map((ad) => (
-                                <AdCard key={ad.id} ad={ad}/>
-                            ))}
-                        </div>
+            <AdsFilters
+                filters={filters}
+                onFiltersChange={setFilters}
+                onApplyFilters={applyFilters}
+                onResetFilters={resetFilters}
+            />
 
-                        {pagination.totalPages > 1 && (
-                            <Pagination>
-                                <PaginationContent>
-                                    <PaginationItem>
-                                        <PaginationPrevious
-                                            onClick={() => handlePageChange(pagination.currentPage - 1)}
-                                            className={
-                                                pagination.currentPage === 1
-                                                    ? "pointer-events-none opacity-50"
-                                                    : "cursor-pointer"
-                                            }
-                                        />
+            <AdsState
+                loading={loading}
+                error={error}
+                empty={!loading && ads.length === 0}
+                hasActiveFilters={hasActiveFilters()}
+                onRetry={fetchAds}
+                onResetFilters={resetFilters}
+            />
+
+            {!loading && error === null && ads.length > 0 && (
+                <>
+                    <div className="space-y-4 mb-6">
+                        {ads.map((ad) => (
+                            <AdCard key={ad.id} ad={ad}/>
+                        ))}
+                    </div>
+
+                    {pagination.totalPages > 1 && (
+                        <Pagination>
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        onClick={() => handlePageChange(pagination.currentPage - 1)}
+                                        className={
+                                            pagination.currentPage === 1
+                                                ? "pointer-events-none opacity-50"
+                                                : "cursor-pointer"
+                                        }
+                                    />
+                                </PaginationItem>
+
+                                {getPageNumbers().map((page) => (
+                                    <PaginationItem key={page}>
+                                        <PaginationLink
+                                            onClick={() => handlePageChange(page)}
+                                            isActive={page === pagination.currentPage}
+                                            className="cursor-pointer"
+                                        >
+                                            {page}
+                                        </PaginationLink>
                                     </PaginationItem>
+                                ))}
 
-                                    {getPageNumbers().map((page) => (
-                                        <PaginationItem key={page}>
-                                            <PaginationLink
-                                                onClick={() => handlePageChange(page)}
-                                                isActive={page === pagination.currentPage}
-                                                className="cursor-pointer"
-                                            >
-                                                {page}
-                                            </PaginationLink>
-                                        </PaginationItem>
-                                    ))}
-
-                                    <PaginationItem>
-                                        <PaginationNext
-                                            onClick={() => handlePageChange(pagination.currentPage + 1)}
-                                            className={
-                                                pagination.currentPage === pagination.totalPages
-                                                    ? "pointer-events-none opacity-50"
-                                                    : "cursor-pointer"
-                                            }
-                                        />
-                                    </PaginationItem>
-                                </PaginationContent>
-                            </Pagination>
-                        )}
-                    </>
-                )}
-            </div>
+                                <PaginationItem>
+                                    <PaginationNext
+                                        onClick={() => handlePageChange(pagination.currentPage + 1)}
+                                        className={
+                                            pagination.currentPage === pagination.totalPages
+                                                ? "pointer-events-none opacity-50"
+                                                : "cursor-pointer"
+                                        }
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    )}
+                </>
+            )}
         </div>
     );
 }
