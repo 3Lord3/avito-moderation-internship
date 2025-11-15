@@ -1,5 +1,5 @@
-import type {AdsFilters, AdsResponse} from '@/types/ads';
-import {apiClient} from '@/services/api/client';
+import type {Ad, AdsFilters, AdsResponse} from '@/types/ads';
+import {API_BASE, apiClient} from './client';
 
 export const adsApi = {
     getAds: async (filters: AdsFilters): Promise<AdsResponse> => {
@@ -26,5 +26,50 @@ export const adsApi = {
         }
 
         return apiClient.get<AdsResponse>(`/ads?${params.toString()}`);
-    }
+    },
+
+    getAdById: async (id: number): Promise<Ad> => {
+        return apiClient.get<Ad>(`/ads/${id}`);
+    },
+
+    approveAd: async (id: number): Promise<{ message: string; ad: Ad }> => {
+        const response = await fetch(`${API_BASE}/ads/${id}/approve`, {
+            method: 'POST',
+        });
+        if (!response.ok) {
+            throw new Error('Failed to approve ad');
+        }
+        return response.json();
+    },
+
+    rejectAd: async (id: number, data: { reason: string; comment?: string }): Promise<{ message: string; ad: Ad }> => {
+        const response = await fetch(`${API_BASE}/ads/${id}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            throw new Error('Failed to reject ad');
+        }
+        return response.json();
+    },
+
+    requestChanges: async (id: number, data: { reason: string; comment?: string }): Promise<{
+        message: string;
+        ad: Ad
+    }> => {
+        const response = await fetch(`${API_BASE}/ads/${id}/request-changes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            throw new Error('Failed to request changes');
+        }
+        return response.json();
+    },
 };
