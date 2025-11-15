@@ -22,6 +22,16 @@ export interface Ad {
         totalAds: number;
         registeredAt: string;
     };
+    characteristics?: Record<string, string>;
+    moderationHistory?: Array<{
+        id: number;
+        moderatorId: number;
+        moderatorName: string;
+        action: string;
+        reason: string | null;
+        comment: string;
+        timestamp: string;
+    }>;
 }
 
 export interface AdsFilters {
@@ -88,3 +98,15 @@ export const ITEMS_PER_PAGE_OPTIONS = [
     {value: '20', label: '20 на странице'},
     {value: '50', label: '50 на странице'},
 ];
+
+export const STATUS_COLORS: Record<AdStatus, string> = {
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    approved: 'bg-green-100 text-green-800 border-green-200',
+    rejected: 'bg-red-100 text-red-800 border-red-200',
+    draft: 'bg-gray-100 text-gray-800 border-gray-200'
+};
+
+export const PRIORITY_COLORS: Record<AdPriority, string> = {
+    normal: 'bg-blue-100 text-blue-800 border-blue-200',
+    urgent: 'bg-orange-100 text-orange-800 border-orange-200'
+};
