@@ -41,18 +41,12 @@ export function AdCard({ad}: AdCardProps) {
             <CardContent className="p-4">
                 <div className="flex gap-4 items-start">
                     {/* Фото */}
-                    <div className="shrink-0">
-                        <div className="bg-muted rounded-lg w-32 h-32 flex items-center justify-center">
-                            <div className="text-muted-foreground text-center">
-                                <div className="text-2xl mb-1">📷</div>
-                                <div className="text-xs">Фото товара</div>
-                                {ad.images?.length > 0 && (
-                                    <div className="text-xs mt-1 text-muted-foreground/70">
-                                        {ad.images.length} фото
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                    <div className="bg-muted rounded-lg w-32 h-32 flex items-center justify-center">
+                        <img
+                            src={ad.images[0]}
+                            alt={ad.title}
+                            className="size-full object-cover"
+                        />
                     </div>
 
                     {/* Информация о товаре */}
