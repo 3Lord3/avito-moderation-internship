@@ -1,4 +1,4 @@
-const API_BASE = '/api/v1';
+export const API_BASE = '/api/v1';
 
 class ApiError extends Error {
     constructor(public status: number, message: string) {
