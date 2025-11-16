@@ -29,12 +29,6 @@ const adsSlice = createSlice({
     name: 'ads',
     initialState,
     reducers: {
-        setLoading: (state, action: PayloadAction<boolean>) => {
-            state.loading = action.payload;
-        },
-        setError: (state, action: PayloadAction<string | null>) => {
-            state.error = action.payload;
-        },
         setCurrentAd: (state, action: PayloadAction<any>) => {
             state.currentAd = action.payload;
         },
@@ -51,8 +45,6 @@ const adsSlice = createSlice({
 });
 
 export const {
-    setLoading,
-    setError,
     setCurrentAd,
     setFilters,
     clearError,

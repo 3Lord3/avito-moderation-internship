@@ -1,5 +1,6 @@
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import type {Ad, AdsFilters, AdsResponse} from '@/types/ads';
+import {statsApi} from "@/services/api/statsApi";
 
 const API_BASE = `/api/v1`;
 
@@ -57,6 +58,13 @@ export const adsApi = createApi({
                 {type: 'Ad', id: result?.ad.id},
                 'AdsList'
             ],
+            onQueryStarted: async (_, {dispatch, queryFulfilled}) => {
+                try {
+                    await queryFulfilled;
+                    dispatch(statsApi.util.invalidateTags(['Stats']));
+                } catch (error) {
+                }
+            },
         }),
 
         rejectAd: builder.mutation<{ message: string; ad: Ad }, {
@@ -72,6 +80,13 @@ export const adsApi = createApi({
                 {type: 'Ad', id: result?.ad.id},
                 'AdsList'
             ],
+            onQueryStarted: async (_, {dispatch, queryFulfilled}) => {
+                try {
+                    await queryFulfilled;
+                    dispatch(statsApi.util.invalidateTags(['Stats']));
+                } catch (error) {
+                }
+            },
         }),
 
         requestChanges: builder.mutation<{ message: string; ad: Ad }, {
@@ -87,6 +102,13 @@ export const adsApi = createApi({
                 {type: 'Ad', id: result?.ad.id},
                 'AdsList'
             ],
+            onQueryStarted: async (_, {dispatch, queryFulfilled}) => {
+                try {
+                    await queryFulfilled;
+                    dispatch(statsApi.util.invalidateTags(['Stats']));
+                } catch (error) {
+                }
+            },
         }),
     }),
 });
