@@ -26,6 +26,7 @@ export default function Item() {
     const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [ad, setAd] = useState<Ad | null>(null);
+    const [allAds, setAllAds] = useState<Ad[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -34,10 +35,8 @@ export default function Item() {
     const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
-        const loadAd = async () => {
-            await fetchAd();
-        };
-        loadAd();
+        fetchAd();
+        fetchAllAds();
     }, [id]);
 
     const fetchAd = async () => {
@@ -59,6 +58,39 @@ export default function Item() {
         }
     };
 
+    const fetchAllAds = async () => {
+        try {
+            const response = await adsApi.getAds({limit: 1000});
+            setAllAds(response.ads);
+        } catch (err) {
+            console.error('Error fetching all ads:', err);
+        }
+    };
+
+    const getCurrentAdIndex = () => {
+        return allAds.findIndex(a => a.id === Number(id));
+    };
+
+    const getNextAd = () => {
+        const currentIndex = getCurrentAdIndex();
+        if (currentIndex < allAds.length - 1) {
+            return allAds[currentIndex + 1];
+        }
+        return null;
+    };
+
+    const getPrevAd = () => {
+        const currentIndex = getCurrentAdIndex();
+        if (currentIndex > 0) {
+            return allAds[currentIndex - 1];
+        }
+        return null;
+    };
+
+    const handleNavigateToAd = (adId: number) => {
+        navigate(`/item/${adId}`);
+    };
+
     const handleApprove = async () => {
         if (!ad) return;
 
@@ -66,6 +98,7 @@ export default function Item() {
             setActionLoading(true);
             await adsApi.approveAd(ad.id);
             await fetchAd();
+            await fetchAllAds();
         } catch (err) {
             console.error('Error approving ad:', err);
         } finally {
@@ -84,6 +117,7 @@ export default function Item() {
             setRejectionReason('');
             setCustomReason('');
             await fetchAd();
+            await fetchAllAds();
         } catch (err) {
             console.error('Error rejecting ad:', err);
         } finally {
@@ -98,6 +132,7 @@ export default function Item() {
             setActionLoading(true);
             await adsApi.requestChanges(ad.id, {reason: 'Требуются изменения'});
             await fetchAd();
+            await fetchAllAds();
         } catch (err) {
             console.error('Error requesting changes:', err);
         } finally {
@@ -131,12 +166,44 @@ export default function Item() {
         );
     }
 
+    const prevAd = getPrevAd();
+    const nextAd = getNextAd();
+    const currentIndex = getCurrentAdIndex();
+    const totalAds = allAds.length;
+
     return (
         <div className="container mx-auto">
+            {/* Навигационная панель с кнопками */}
             <div className="flex justify-between items-center mb-6">
-                <Button variant="outline" onClick={() => navigate('/')}>
-                    ← Назад к списку
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => navigate('/list')}>
+                        ← Назад к списку
+                    </Button>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <div className="text-sm text-muted-foreground">
+                        {totalAds > 0 ? `${currentIndex + 1} из ${totalAds}` : ''}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => prevAd && handleNavigateToAd(prevAd.id)}
+                            disabled={!prevAd}
+                        >
+                            ← Предыдущее
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => nextAd && handleNavigateToAd(nextAd.id)}
+                            disabled={!nextAd}
+                        >
+                            Следующее →
+                        </Button>
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
