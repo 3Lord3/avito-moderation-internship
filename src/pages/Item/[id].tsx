@@ -7,10 +7,17 @@ import {Textarea} from '@/components/ui/textarea';
 import {Label} from '@/components/ui/label';
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from '@/components/ui/carousel';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
-import {adsApi} from '@/services/api/ads';
-import type {Ad} from '@/types/ads';
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from '@/components/ui/carousel';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {useAppDispatch, useAppSelector} from '@/hooks/redux';
+import {
+    useApproveAdMutation,
+    useGetAdByIdQuery,
+    useGetAdsQuery,
+    useRejectAdMutation,
+    useRequestChangesMutation
+} from '@/services/api/adsApi';
+import {clearError, setActionLoading, setCurrentAd} from '@/store/ads/adsSlice';
 import {PRIORITY_COLORS, STATUS_COLORS} from '@/types/ads';
 
 const REJECTION_REASONS = [
@@ -25,47 +32,39 @@ const REJECTION_REASONS = [
 export default function Item() {
     const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [ad, setAd] = useState<Ad | null>(null);
-    const [allAds, setAllAds] = useState<Ad[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const dispatch = useAppDispatch();
+
+    const {currentAd: ad, actionLoading} = useAppSelector((state) => state.ads);
+
+    const {data: adsData} = useGetAdsQuery({limit: 1000});
+    const allAds = adsData?.ads || [];
+
+    const {
+        data: adData,
+        isLoading: loading,
+        error: queryError
+    } = useGetAdByIdQuery(Number(id), {
+        skip: !id,
+    });
+
+    const [approveAdMutation] = useApproveAdMutation();
+    const [rejectAdMutation] = useRejectAdMutation();
+    const [requestChangesMutation] = useRequestChangesMutation();
+
     const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [customReason, setCustomReason] = useState('');
-    const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
-        fetchAd();
-        fetchAllAds();
-    }, [id]);
-
-    const fetchAd = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const adData = await adsApi.getAdById(Number(id));
-            setAd(adData);
-        } catch (err) {
-            const response = await adsApi.getAds({limit: 1000});
-            const foundAd = response.ads.find(a => a.id === Number(id));
-            if (foundAd) {
-                setAd(foundAd);
-            } else {
-                setError('Объявление не найдено');
-            }
-        } finally {
-            setLoading(false);
+        if (adData) {
+            dispatch(setCurrentAd(adData));
         }
-    };
 
-    const fetchAllAds = async () => {
-        try {
-            const response = await adsApi.getAds({limit: 1000});
-            setAllAds(response.ads);
-        } catch (err) {
-            console.error('Error fetching all ads:', err);
-        }
-    };
+        return () => {
+            dispatch(setCurrentAd(null));
+            dispatch(clearError());
+        };
+    }, [adData, dispatch]);
 
     const getCurrentAdIndex = () => {
         return allAds.findIndex(a => a.id === Number(id));
@@ -93,16 +92,13 @@ export default function Item() {
 
     const handleApprove = async () => {
         if (!ad) return;
-
         try {
-            setActionLoading(true);
-            await adsApi.approveAd(ad.id);
-            await fetchAd();
-            await fetchAllAds();
+            dispatch(setActionLoading(true));
+            await approveAdMutation(ad.id).unwrap();
         } catch (err) {
             console.error('Error approving ad:', err);
         } finally {
-            setActionLoading(false);
+            dispatch(setActionLoading(false));
         }
     };
 
@@ -110,18 +106,20 @@ export default function Item() {
         if (!ad) return;
 
         try {
-            setActionLoading(true);
+            dispatch(setActionLoading(true));
             const finalReason = rejectionReason === 'Другое' ? customReason : rejectionReason;
-            await adsApi.rejectAd(ad.id, {reason: finalReason});
+            await rejectAdMutation({
+                id: ad.id,
+                data: {reason: finalReason}
+            }).unwrap();
+
             setRejectDialogOpen(false);
             setRejectionReason('');
             setCustomReason('');
-            await fetchAd();
-            await fetchAllAds();
         } catch (err) {
             console.error('Error rejecting ad:', err);
         } finally {
-            setActionLoading(false);
+            dispatch(setActionLoading(false));
         }
     };
 
@@ -129,16 +127,19 @@ export default function Item() {
         if (!ad) return;
 
         try {
-            setActionLoading(true);
-            await adsApi.requestChanges(ad.id, {reason: 'Требуются изменения'});
-            await fetchAd();
-            await fetchAllAds();
+            dispatch(setActionLoading(true));
+            await requestChangesMutation({
+                id: ad.id,
+                data: {reason: 'Требуются изменения'}
+            }).unwrap();
         } catch (err) {
             console.error('Error requesting changes:', err);
         } finally {
-            setActionLoading(false);
+            dispatch(setActionLoading(false));
         }
     };
+
+    const error = queryError ? 'Ошибка при загрузке объявления' : null;
 
     if (loading) {
         return (
@@ -173,7 +174,6 @@ export default function Item() {
 
     return (
         <div className="container mx-auto">
-            {/* Навигационная панель с кнопками */}
             <div className="flex justify-between items-center mb-6">
                 <div className="flex gap-2">
                     <Button variant="outline" onClick={() => navigate('/list')}>
