@@ -11,6 +11,7 @@ import {StatsMetrics} from '@/components/stats/StatsMetrics';
 import {ActivityChart} from '@/components/stats/ActivityChart';
 import {DecisionsChart} from '@/components/stats/DecisionsChart';
 import {CategoriesChart} from '@/components/stats/CategoriesChart';
+import {ExportButtons} from "@/components/stats/ExportButtons";
 
 export default function Stats() {
     const [filters, setFilters] = useState<StatsFilters>({period: 'week'});
@@ -36,8 +37,15 @@ export default function Stats() {
 
     return (
         <div className="container mx-auto p-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold">Моя статистика модерации</h1>
+            <div className="flex items-center justify-between gap-4">
+                <h1 className="text-3xl font-bold mr-auto">Моя статистика модерации</h1>
+                <ExportButtons
+                    filters={filters}
+                    statsSummary={statsSummary}
+                    activityData={activityData}
+                    decisionsData={decisionsData}
+                    categoriesData={categoriesData}
+                />
                 <div className="text-sm text-muted-foreground">
                     Обновлено: {new Date().toLocaleDateString('ru-RU')} {new Date().toLocaleTimeString('ru-RU', {
                     hour: '2-digit',
