@@ -90,12 +90,12 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
                     <Label htmlFor="search">Поиск</Label>
                     <div className="relative">
                         <Input
+                            className="w-full"
                             ref={searchInputRef}
                             id="search"
                             placeholder="Название или описание..."
                             value={filters.search || ''}
                             onChange={(e) => handleFilterChange('search', e.target.value)}
-                            className="pr-16" // Добавляем отступ справа для Kbd
                         />
                         <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                             <Kbd className="text-xs">/</Kbd>
@@ -113,7 +113,7 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
                             handleFilterChange('priority', priorityValue);
                         }}
                     >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                             <SelectValue placeholder="Все приоритеты"/>
                         </SelectTrigger>
                         <SelectContent>
@@ -137,7 +137,7 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
                             handleFilterChange('categoryId', categoryId);
                         }}
                     >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                             <SelectValue placeholder="Все категории"/>
                         </SelectTrigger>
                         <SelectContent>
@@ -236,7 +236,7 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
                         value={getSafeLimitValue()}
                         onValueChange={(value) => handleFilterChange('limit', parseInt(value))}
                     >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                             <SelectValue/>
                         </SelectTrigger>
                         <SelectContent>
@@ -251,7 +251,7 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
             </div>
 
             {/* Кнопки действий */}
-            <div className="flex justify-between items-center pt-4 border-t">
+            <div className="flex justify-between items-center pt-6 border-t">
                 <div className="text-sm text-muted-foreground">
                     {hasActiveFilters() ? 'Настроены параметры' : 'Все настройки сброшены'}
                 </div>

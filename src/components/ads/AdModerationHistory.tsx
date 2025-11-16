@@ -20,7 +20,7 @@ export function AdModerationHistory({ad}: AdModerationHistoryProps) {
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="font-semibold">{history.moderatorName}</p>
-                                        <p className="text-sm text-gray-600">
+                                        <p className="text-sm">
                                             {new Date(history.timestamp).toLocaleString()}
                                         </p>
                                     </div>
@@ -38,7 +38,7 @@ export function AdModerationHistory({ad}: AdModerationHistoryProps) {
                                     </p>
                                 )}
                                 {history.comment && (
-                                    <p className="mt-1 text-sm text-gray-600">
+                                    <p className="mt-1 text-sm">
                                         <strong>Комментарий:</strong> {history.comment}
                                     </p>
                                 )}

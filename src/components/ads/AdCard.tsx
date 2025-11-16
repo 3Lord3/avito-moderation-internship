@@ -38,7 +38,7 @@ export function AdCard({ad}: AdCardProps) {
 
     return (
         <Card className="hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
+            <CardContent>
                 <div className="flex gap-4 items-start">
                     {/* Фото */}
                     <div className="bg-muted rounded-lg w-32 h-32 flex items-center justify-center">
@@ -70,24 +70,25 @@ export function AdCard({ad}: AdCardProps) {
                                 {formatPrice(ad.price)}
                             </span>
                             <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">
-                            {ad.category}
-                          </span>
+                                {ad.category}
+                            </span>
                         </div>
 
                         <div className="text-xs text-muted-foreground">
                             Создано: {formatDate(ad.createdAt)}
                         </div>
+
+                        {/* Кнопка */}
+                        <div className="shrink-0 flex justify-end">
+                            <Button asChild>
+                                <Link to={`/item/${ad.id}`}>
+                                    Открыть
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
-                {/* Кнопка */}
-                <div className="shrink-0 flex justify-end">
-                    <Button asChild>
-                        <Link to={`/item/${ad.id}`}>
-                            Открыть
-                        </Link>
-                    </Button>
-                </div>
             </CardContent>
         </Card>
     );

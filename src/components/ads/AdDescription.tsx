@@ -12,7 +12,7 @@ export function AdDescription({ad}: AdDescriptionProps) {
                 <CardTitle>Описание</CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="text-gray-700 whitespace-pre-line">{ad.description}</p>
+                <p className="whitespace-pre-line">{ad.description}</p>
             </CardContent>
         </Card>
     );

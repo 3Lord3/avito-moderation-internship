@@ -32,7 +32,7 @@ export function ActivityChart({data}: ActivityChartProps) {
     }));
 
     return (
-        <Card>
+        <Card className="h-full">
             <CardHeader>
                 <CardTitle>Активность модерации</CardTitle>
                 <CardDescription>Количество решений по дням</CardDescription>

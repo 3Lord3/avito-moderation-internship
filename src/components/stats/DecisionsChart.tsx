@@ -31,7 +31,7 @@ export function DecisionsChart({data}: DecisionsChartProps) {
     ];
 
     return (
-        <Card className="flex flex-col">
+        <Card className="h-full">
             <CardHeader className="items-center pb-0">
                 <CardTitle>Распределение решений</CardTitle>
                 <CardDescription>За выбранный период</CardDescription>
@@ -39,7 +39,7 @@ export function DecisionsChart({data}: DecisionsChartProps) {
             <CardContent className="flex-1 pb-0">
                 <ChartContainer
                     config={chartConfig}
-                    className="mx-auto aspect-square max-h-[250px]"
+                    className="mx-auto aspect-square h-full"
                 >
                     <PieChart>
                         <ChartTooltip

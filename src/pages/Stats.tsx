@@ -30,14 +30,14 @@ export default function Stats() {
 
     if (isLoading) {
         return (
-            <div className="container mx-auto p-6">
+            <div className="container mx-auto">
                 <div className="text-center">Загрузка статистики...</div>
             </div>
         );
     }
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
+        <div className="container mx-auto space-y-6">
             <div className="flex items-center justify-between gap-4">
                 <h1 className="text-3xl font-bold mr-auto">Моя статистика модерации</h1>
                 <ExportButtons
