@@ -1,6 +1,6 @@
 import {Monitor, Moon, Sun} from "lucide-react"
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs"
-import {useTheme} from "@/hooks/theme-provider"
+import {useTheme} from "@/providers/theme-provider"
 
 export function ModeToggle() {
     const {theme, setTheme} = useTheme()
