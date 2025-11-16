@@ -1,9 +1,10 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
 import {Label} from '@/components/ui/label';
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {Kbd} from '@/components/ui/kbd';
 
 const REJECTION_REASONS = [
     'Запрещенный товар',
@@ -25,6 +26,27 @@ export function RejectDialog({open, onOpenChange, onReject, actionLoading}: Reje
     const [rejectionReason, setRejectionReason] = useState('');
     const [customReason, setCustomReason] = useState('');
 
+    // Обработчик горячей клавиши Enter
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Enter' && open) {
+                event.preventDefault();
+                const canSubmit = rejectionReason &&
+                    (rejectionReason !== 'Другое' || customReason) &&
+                    !actionLoading;
+
+                if (canSubmit) {
+                    handleReject();
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [open, rejectionReason, customReason, actionLoading]);
+
     const handleReject = () => {
         const finalReason = rejectionReason === 'Другое' ? customReason : rejectionReason;
         onReject(finalReason);
@@ -35,6 +57,10 @@ export function RejectDialog({open, onOpenChange, onReject, actionLoading}: Reje
         setRejectionReason('');
         setCustomReason('');
     };
+
+    const canSubmit = rejectionReason &&
+        (rejectionReason !== 'Другое' || customReason) &&
+        !actionLoading;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -71,9 +97,11 @@ export function RejectDialog({open, onOpenChange, onReject, actionLoading}: Reje
                     </Button>
                     <Button
                         onClick={handleReject}
-                        disabled={!rejectionReason || (rejectionReason === 'Другое' && !customReason) || actionLoading}
+                        disabled={!canSubmit}
+                        className="flex items-center gap-2"
                     >
                         Отклонить
+                        <Kbd className="text-xs">Enter</Kbd>
                     </Button>
                 </DialogFooter>
             </DialogContent>

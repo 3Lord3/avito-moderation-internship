@@ -3,6 +3,8 @@ import {Input} from '@/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from '@/components/ui/select';
 import {ToggleGroup, ToggleGroupItem} from '@/components/ui/toggle-group';
 import {Label} from '@/components/ui/label';
+import {Kbd} from '@/components/ui/kbd';
+import {useEffect, useRef} from 'react';
 import type {AdPriority, AdsFilters, AdStatus, SortField} from '@/types/ads';
 import {CATEGORY_OPTIONS, ITEMS_PER_PAGE_OPTIONS, PRIORITY_OPTIONS, SORT_OPTIONS, STATUS_OPTIONS} from '@/types/ads';
 
@@ -14,6 +16,30 @@ interface AdsFiltersProps {
 }
 
 export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFilters}: AdsFiltersProps) {
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // Обработчик горячих клавиш
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Фокус на поиск при нажатии /
+            if (event.key === '/' && !(event.target instanceof HTMLInputElement)) {
+                event.preventDefault();
+                searchInputRef.current?.focus();
+            }
+
+            // Применить фильтры при нажатии Enter (когда не в поле ввода)
+            if (event.key === 'Enter' && !(event.target instanceof HTMLInputElement)) {
+                event.preventDefault();
+                onApplyFilters();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [onApplyFilters]);
+
     const handleFilterChange = (key: keyof AdsFilters, value: any) => {
         onFiltersChange({
             ...filters,
@@ -64,12 +90,19 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
                 {/* Поиск */}
                 <div className="space-y-2">
                     <Label htmlFor="search">Поиск</Label>
-                    <Input
-                        id="search"
-                        placeholder="Название или описание..."
-                        value={filters.search || ''}
-                        onChange={(e) => handleFilterChange('search', e.target.value)}
-                    />
+                    <div className="relative">
+                        <Input
+                            ref={searchInputRef}
+                            id="search"
+                            placeholder="Название или описание..."
+                            value={filters.search || ''}
+                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                            className="pr-16" // Добавляем отступ справа для Kbd
+                        />
+                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                            <Kbd className="text-xs">/</Kbd>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Приоритет */}
@@ -225,8 +258,12 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
                     {hasActiveFilters() ? 'Настроены фильтры' : 'Все фильтры сброшены'}
                 </div>
                 <div className="flex gap-2">
-                    <Button onClick={onApplyFilters}>
+                    <Button
+                        onClick={onApplyFilters}
+                        className="flex items-center gap-2"
+                    >
                         Применить фильтры
+                        <Kbd className="text-xs">Enter</Kbd>
                     </Button>
                     {hasActiveFilters() && (
                         <Button variant="outline" onClick={onResetFilters}>

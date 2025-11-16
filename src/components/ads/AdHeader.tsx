@@ -1,5 +1,7 @@
 import {Button} from '@/components/ui/button';
+import {Kbd} from '@/components/ui/kbd';
 import {useNavigate} from 'react-router-dom';
+import {useEffect} from 'react';
 
 interface AdPageHeaderProps {
     currentIndex: number;
@@ -11,6 +13,39 @@ interface AdPageHeaderProps {
 
 export function AdHeader({currentIndex, totalAds, prevAd, nextAd, onNavigateToAd}: AdPageHeaderProps) {
     const navigate = useNavigate();
+
+    // Обработчик горячих клавиш для навигации
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Игнорируем если фокус в input или textarea
+            if (
+                event.target instanceof HTMLInputElement ||
+                event.target instanceof HTMLTextAreaElement
+            ) {
+                return;
+            }
+
+            switch (event.key.toLowerCase()) {
+                case 'arrowleft':
+                    event.preventDefault();
+                    if (prevAd) {
+                        onNavigateToAd(prevAd.id);
+                    }
+                    break;
+                case 'arrowright':
+                    event.preventDefault();
+                    if (nextAd) {
+                        onNavigateToAd(nextAd.id);
+                    }
+                    break;
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [prevAd, nextAd, onNavigateToAd]);
 
     return (
         <div className="flex justify-between items-center mb-6">
@@ -30,16 +65,20 @@ export function AdHeader({currentIndex, totalAds, prevAd, nextAd, onNavigateToAd
                         size="sm"
                         onClick={() => prevAd && onNavigateToAd(prevAd.id)}
                         disabled={!prevAd}
+                        className="flex items-center gap-2"
                     >
-                        ← Предыдущее
+                        <Kbd>←</Kbd>
+                        Предыдущее
                     </Button>
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={() => nextAd && onNavigateToAd(nextAd.id)}
                         disabled={!nextAd}
+                        className="flex items-center gap-2"
                     >
-                        Следующее →
+                        Следующее
+                        <Kbd>→</Kbd>
                     </Button>
                 </div>
             </div>
