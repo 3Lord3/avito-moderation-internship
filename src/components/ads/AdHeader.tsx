@@ -17,7 +17,6 @@ export function AdHeader({currentIndex, totalAds, prevAd, nextAd, onNavigateToAd
     // Обработчик горячих клавиш для навигации
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            // Игнорируем если фокус в input или textarea
             if (
                 event.target instanceof HTMLInputElement ||
                 event.target instanceof HTMLTextAreaElement

@@ -9,19 +9,37 @@ import {useAdsFilters} from '@/hooks/ads/useAdsFilters';
 import {useAppDispatch} from '@/hooks/redux';
 import {setFilters} from '@/store/ads/adsSlice';
 import type {AdsFilters as AdsFiltersType} from '@/types/ads';
+import {useState} from 'react';
 
 export default function List() {
     const dispatch = useAppDispatch();
-    const {filters, hasActiveFilters} = useAdsFiltersState();
-    const {ads, pagination, loading, error} = useAdsData(filters);
-    const {resetFilters, setPage} = useAdsFilters();
+    const {filters: currentFilters, hasActiveFilters} = useAdsFiltersState();
+    const {ads, pagination, loading, error} = useAdsData(currentFilters);
+    const {setPage} = useAdsFilters();
+
+    const [tempFilters, setTempFilters] = useState<AdsFiltersType>(currentFilters);
 
     const handleFiltersChange = (newFilters: Partial<AdsFiltersType>) => {
-        dispatch(setFilters(newFilters));
+        setTempFilters(prev => ({
+            ...prev,
+            ...newFilters
+        }));
     };
 
     const handleApplyFilters = () => {
-        dispatch(setFilters({...filters, page: 1}));
+        dispatch(setFilters(tempFilters));
+    };
+
+    const handleResetFilters = () => {
+        const defaultFilters = {
+            page: 1,
+            limit: 10,
+            sortBy: 'createdAt',
+            sortOrder: 'desc'
+        } as AdsFiltersType;
+
+        setTempFilters(defaultFilters);
+        dispatch(setFilters(defaultFilters));
     };
 
     const handlePageChange = (newPage: number) => {
@@ -35,10 +53,10 @@ export default function List() {
             <AdsHeader adsCount={ads.length} totalItems={pagination.totalItems}/>
 
             <AdsFilters
-                filters={filters}
+                filters={tempFilters}
                 onFiltersChange={handleFiltersChange}
                 onApplyFilters={handleApplyFilters}
-                onResetFilters={resetFilters}
+                onResetFilters={handleResetFilters}
             />
 
             <AdsState
@@ -48,7 +66,7 @@ export default function List() {
                 hasActiveFilters={hasActiveFilters()}
                 onRetry={() => {
                 }}
-                onResetFilters={resetFilters}
+                onResetFilters={handleResetFilters}
             />
 
             {!loading && error === null && ads.length > 0 && (

@@ -27,7 +27,7 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
                 searchInputRef.current?.focus();
             }
 
-            // Применить фильтры при нажатии Enter (когда не в поле ввода)
+            // Применить фильтры при нажатии Enter
             if (event.key === 'Enter' && !(event.target instanceof HTMLInputElement)) {
                 event.preventDefault();
                 onApplyFilters();
@@ -255,21 +255,21 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
             {/* Кнопки действий */}
             <div className="flex justify-between items-center pt-4 border-t">
                 <div className="text-sm text-muted-foreground">
-                    {hasActiveFilters() ? 'Настроены фильтры' : 'Все фильтры сброшены'}
+                    {hasActiveFilters() ? 'Настроены параметры' : 'Все настройки сброшены'}
                 </div>
                 <div className="flex gap-2">
+                    {hasActiveFilters() && (
+                        <Button variant="outline" onClick={onResetFilters}>
+                            Сбросить всё
+                        </Button>
+                    )}
                     <Button
                         onClick={onApplyFilters}
                         className="flex items-center gap-2"
                     >
-                        Применить фильтры
+                        Применить настройки
                         <Kbd className="text-xs">Enter</Kbd>
                     </Button>
-                    {hasActiveFilters() && (
-                        <Button variant="outline" onClick={onResetFilters}>
-                            Сбросить все
-                        </Button>
-                    )}
                 </div>
             </div>
         </div>
