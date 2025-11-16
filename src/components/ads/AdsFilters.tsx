@@ -8,7 +8,7 @@ import {CATEGORY_OPTIONS, ITEMS_PER_PAGE_OPTIONS, PRIORITY_OPTIONS, SORT_OPTIONS
 
 interface AdsFiltersProps {
     filters: AdsFilters;
-    onFiltersChange: (filters: AdsFilters) => void;
+    onFiltersChange: (filters: Partial<AdsFilters>) => void;
     onApplyFilters: () => void;
     onResetFilters: () => void;
 }
