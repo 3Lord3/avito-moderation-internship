@@ -1,6 +1,6 @@
 # Тестовое задание Avito Frontend осень 2025
 ## Установка и запуск
-Docker Compose
+### Docker Compose
 ```
 // Клонирование репозитория
 git clone git@github.com:3Lord3/avito-moderation-internship.git
@@ -9,25 +9,9 @@ cd avito-moderation-internship
 docker compose up --build
 ```
 
-Без Docker
-```
-// Клонирование репозитория
-git clone git@github.com:3Lord3/avito-moderation-internship.git
-cd avito-moderation-internship
-
-// Запуск сервера (Терминал 1)
-cd tech-int3-server
-npm install
-npm start
-
-// Запуск фронтенда (Терминал 2)
-cd frontend
-npm install
-npm run dev
-```
 Приложение будет доступно по адресу: http://localhost:5173
 
-## Обоснование необязательных технологий
+## Обоснование выбора необязательных технологий
 **Основа: Библиотека компонентов Shadcn UI**. Выбрана за гибкую настройку - представляет из себя стилизованные компоненты Radix UI с установкой локально только использованных компонентов. Ускоряет разработку и уменьшает количество проблем с дизайном
 
 Подтянутые зависимости Shadcn:
