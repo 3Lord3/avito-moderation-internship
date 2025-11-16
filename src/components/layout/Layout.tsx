@@ -1,5 +1,5 @@
 import type {ReactNode} from 'react'
-import Navigation from '@/components/layout/Navigation'
+import Header from '@/components/layout/Header'
 
 interface LayoutProps {
     children: ReactNode
@@ -8,7 +8,7 @@ interface LayoutProps {
 export default function Layout({children}: LayoutProps) {
     return (
         <div className="min-h-screen">
-            <Navigation/>
+            <Header/>
             <main className="container mx-auto px-4 py-8">
                 {children}
             </main>
