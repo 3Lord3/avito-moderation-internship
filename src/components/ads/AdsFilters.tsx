@@ -21,13 +21,11 @@ export function AdsFilters({filters, onFiltersChange, onApplyFilters, onResetFil
     // Обработчик горячих клавиш
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            // Фокус на поиск при нажатии /
             if (event.key === '/' && !(event.target instanceof HTMLInputElement)) {
                 event.preventDefault();
                 searchInputRef.current?.focus();
             }
 
-            // Применить фильтры при нажатии Enter
             if (event.key === 'Enter' && !(event.target instanceof HTMLInputElement)) {
                 event.preventDefault();
                 onApplyFilters();

@@ -1,4 +1,3 @@
-import {useState} from 'react';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {
     useGetActivityDataQuery,
@@ -12,9 +11,11 @@ import {ActivityChart} from '@/components/stats/ActivityChart';
 import {DecisionsChart} from '@/components/stats/DecisionsChart';
 import {CategoriesChart} from '@/components/stats/CategoriesChart';
 import {ExportButtons} from "@/components/stats/ExportButtons";
+import {useLocalStorage} from '@/hooks/useLocalStorage';
 
 export default function Stats() {
-    const [filters, setFilters] = useState<StatsFilters>({period: 'week'});
+    // Сохраняем период в LocalStorage
+    const [filters, setFilters] = useLocalStorage<StatsFilters>('stats-period', {period: 'week'});
 
     const {data: statsSummary, isLoading: summaryLoading} = useGetStatsSummaryQuery(filters);
     const {data: activityData, isLoading: activityLoading} = useGetActivityDataQuery(filters);
@@ -54,15 +55,24 @@ export default function Stats() {
                 </div>
             </div>
 
-            <Tabs defaultValue="week" className="space-y-6">
+            <Tabs defaultValue={filters.period || 'week'} className="space-y-6">
                 <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="today" onClick={() => handlePeriodChange('today')}>
+                    <TabsTrigger
+                        value="today"
+                        onClick={() => handlePeriodChange('today')}
+                    >
                         Сегодня
                     </TabsTrigger>
-                    <TabsTrigger value="week" onClick={() => handlePeriodChange('week')}>
+                    <TabsTrigger
+                        value="week"
+                        onClick={() => handlePeriodChange('week')}
+                    >
                         Неделя
                     </TabsTrigger>
-                    <TabsTrigger value="month" onClick={() => handlePeriodChange('month')}>
+                    <TabsTrigger
+                        value="month"
+                        onClick={() => handlePeriodChange('month')}
+                    >
                         Месяц
                     </TabsTrigger>
                 </TabsList>
